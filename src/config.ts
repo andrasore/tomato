@@ -4,30 +4,35 @@ import * as os from 'os'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-interface Recipe {
-  timeUnit: 'seconds' | 'minutes'
-  interval: number
-  break: number
-  longBreak: number
+interface RecipeUsingMinutes {
+  timeUnit: 'minutes'
+  workTime: number
+  breakTime: number
+  repeats: number
+}
+
+export interface RecipeUsingSeconds {
+  timeUnit: 'seconds'
+  workTime: number
+  breakTime: number
   repeats: number
 }
 
 const ConfigSchema = zod.object({
   recipes: zod.record(zod.object({
     timeUnit: zod.union([zod.literal('seconds'), zod.literal('minutes')]).default('minutes'),
-    interval: zod.number().int().nonnegative().default(25),
-    break: zod.number().int().nonnegative().default(5),
-    longBreak: zod.number().int().nonnegative().default(30),
+    workTime: zod.number().int().nonnegative().default(25),
+    breakTime: zod.number().int().nonnegative().default(5),
     repeats: zod.number().int().nonnegative().default(2)
   }))
 }).strict()
 
 /** Gets run recipe from config file, with fallback to default config */
-export async function getRecipe (recipeName: string): Promise<Recipe> {
-  const localCfgPath = path.join(process.cwd(), '.pomrc.yml')
-  const userCfgPath = path.join(os.homedir(), '.pomrc.yml')
+export async function getRecipe (recipeName: string): Promise<RecipeUsingSeconds> {
+  const localCfgPath = path.join(process.cwd(), '.tomrc.yml')
+  const userCfgPath = path.join(os.homedir(), '.tomrc.yml')
 
-  let recipe: Recipe | null = null
+  let recipe: RecipeUsingMinutes | RecipeUsingSeconds | null = null
 
   if (await fs.pathExists(localCfgPath)) {
     const config = ConfigSchema.safeParse(yaml.load(await fs.readFile(localCfgPath, 'utf8')))
@@ -55,12 +60,24 @@ export async function getRecipe (recipeName: string): Promise<Recipe> {
     console.log('No config files found in cwd or home directory, using default recipe...')
     recipe = {
       timeUnit: 'minutes',
-      interval: 25,
-      break: 5,
-      longBreak: 7,
+      workTime: 25,
+      breakTime: 5,
       repeats: 1
     }
   }
 
-  return recipe
+  if (recipe.timeUnit === 'seconds') {
+    return recipe
+  } else {
+    return convertToUsingSeconds(recipe)
+  }
+}
+
+function convertToUsingSeconds (recipe: RecipeUsingMinutes): RecipeUsingSeconds {
+  return {
+    timeUnit: 'seconds',
+    workTime: recipe.workTime * 60,
+    breakTime: recipe.breakTime * 60,
+    repeats: recipe.repeats
+  }
 }
