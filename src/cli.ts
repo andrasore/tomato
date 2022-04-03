@@ -25,22 +25,27 @@ async function run (): Promise<void> {
   const recipeName = program.opts().recipe as string
   const recipe = await config.getRecipe(recipeName)
 
-  const spinner = ora(`Starting recipe "${recipeName}"...`).start()
+  const spinner = ora()
+
+  spinner.stopAndPersist({ symbol: '🍅', text: `Starting recipe "${recipeName}"...` })
+  spinner.start()
 
   const emitter = new EventEmitter()
 
   emitter.on('workFinish', () => {
     spinner.succeed()
     notifier.notify('Work finished!')
+    spinner.start()
   })
 
   emitter.on('breakFinish', () => {
     spinner.succeed()
     notifier.notify('Break finished!')
+    spinner.start()
   })
 
-  emitter.on('allFinish', () => {
-    spinner.text = 'All pomodoros completed! 🌠'
+  emitter.on('recipeFinish', () => {
+    spinner.stopAndPersist({ symbol: '🌠', text: 'All pomodoros completed!' })
   })
 
   for (const timerState of ticks(recipe, emitter)) {
