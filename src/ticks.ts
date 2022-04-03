@@ -19,7 +19,7 @@ export function * ticks (recipe: RecipeUsingSeconds, emitter: EventEmitter): Gen
         repeat: r + 1
       }
     }
-    emitter.emit('workFinish')
+    emitter.emit('workFinish', r + 1)
     for (let t = 0; t < recipe.breakTime; t++) {
       yield {
         stage: 'break',
@@ -27,7 +27,7 @@ export function * ticks (recipe: RecipeUsingSeconds, emitter: EventEmitter): Gen
         repeat: r + 1
       }
     }
-    emitter.emit('breakFinish')
+    emitter.emit('breakFinish', r + 1)
   }
   emitter.emit('recipeFinish')
 }

@@ -32,14 +32,14 @@ async function run (): Promise<void> {
 
   const emitter = new EventEmitter()
 
-  emitter.on('workFinish', () => {
-    spinner.succeed()
+  emitter.on('workFinish', (repeatNum) => {
+    spinner.succeed(`Work stage ${repeatNum} finished.`)
     notifier.notify('Work finished!')
     spinner.start()
   })
 
-  emitter.on('breakFinish', () => {
-    spinner.succeed()
+  emitter.on('breakFinish', (repeatNum) => {
+    spinner.succeed(`Break stage ${repeatNum} finished.`)
     notifier.notify('Break finished!')
     spinner.start()
   })
