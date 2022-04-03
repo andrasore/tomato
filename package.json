@@ -1,0 +1,38 @@
+{
+  "name": "tomato",
+  "version": "1.0.0",
+  "description": "A basic cli pomodoro timer",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrasore/tomato.git"
+  },
+  "keywords": [
+    "pomodoro",
+    "focus",
+    "timer"
+  ],
+  "author": "Andras Sore",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrasore/tomato/issues"
+  },
+  "homepage": "https://github.com/andrasore/tomato#readme",
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^17.0.23",
+    "@types/node-notifier": "^8.0.2",
+    "ts-standard": "^11.0.0"
+  },
+  "dependencies": {
+    "commander": "^9.1.0",
+    "fs-extra": "^10.0.1",
+    "js-yaml": "^4.1.0",
+    "node-notifier": "^10.0.1",
+    "ora": "^6.1.0",
+    "zod": "^3.14.3"
+  }
+}
