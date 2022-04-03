@@ -1,22 +1,16 @@
 import zod from 'zod'
-import * as yaml from 'js-yaml'
 import * as os from 'os'
+import * as yaml from 'js-yaml'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import { RecipeUsingSeconds, RecipeUsingMinutes } from './recipe'
 
-interface RecipeUsingMinutes {
-  timeUnit: 'minutes'
-  workTime: number
-  breakTime: number
-  repeats: number
-}
-
-export interface RecipeUsingSeconds {
-  timeUnit: 'seconds'
-  workTime: number
-  breakTime: number
-  repeats: number
-}
+const configPaths = [
+  path.join(process.cwd(), '.tomrc.yml'),
+  path.join(process.cwd(), '.tomrc.yaml'),
+  path.join(os.homedir(), '.tomrc.yml'),
+  path.join(os.homedir(), '.tomrc.yaml')
+].filter(p => fs.existsSync(p))
 
 const ConfigSchema = zod.object({
   recipes: zod.record(zod.object({
@@ -29,29 +23,15 @@ const ConfigSchema = zod.object({
 
 /** Gets run recipe from config file, with fallback to default config */
 export async function getRecipe (recipeName: string): Promise<RecipeUsingSeconds> {
-  const localCfgPath = path.join(process.cwd(), '.tomrc.yml')
-  const userCfgPath = path.join(os.homedir(), '.tomrc.yml')
-
   let recipe: RecipeUsingMinutes | RecipeUsingSeconds | null = null
 
-  if (await fs.pathExists(localCfgPath)) {
-    const config = ConfigSchema.safeParse(yaml.load(await fs.readFile(localCfgPath, 'utf8')))
+  if (configPaths.length > 0) {
+    const config = ConfigSchema.safeParse(yaml.load(await fs.readFile(configPaths[0], 'utf8')))
     if (!config.success) {
       throw new Error(`Failed to parse config file! Issues are: ${JSON.stringify(config.error.issues)}`)
     }
     if (config.data.recipes[recipeName] === undefined) {
-      throw new Error(`No recipe named "${recipeName}" found in local config path! (${localCfgPath})`)
-    }
-    recipe = config.data.recipes[recipeName]
-  }
-
-  if (await fs.pathExists(userCfgPath)) {
-    const config = ConfigSchema.safeParse(yaml.load(await fs.readFile(userCfgPath, 'utf8')))
-    if (!config.success) {
-      throw new Error(`Failed to parse config file! Issues are: ${JSON.stringify(config.error.issues)}`)
-    }
-    if (config.data.recipes[recipeName] === undefined) {
-      throw new Error(`No recipe named "${recipeName}" found in user config path! (${userCfgPath})`)
+      throw new Error(`No recipe named "${recipeName}" found in config path! (${configPaths[0]})`)
     }
     recipe = config.data.recipes[recipeName]
   }

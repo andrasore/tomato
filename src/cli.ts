@@ -1,10 +1,11 @@
-import * as notifier from 'node-notifier'
+import notifier from 'node-notifier'
 import { Command } from 'commander'
 import { setTimeout as setTimeoutAsync } from 'timers/promises'
 import * as packageJson from '../package.json'
 import * as config from './config'
 import ora from 'ora'
-import { RecipeUsingSeconds } from './config'
+import { ticks } from './ticks'
+import EventEmitter from 'events'
 
 const program = new Command()
 
@@ -26,39 +27,32 @@ async function run (): Promise<void> {
 
   const spinner = ora(`Starting recipe "${recipeName}"...`).start()
 
-  for (const timerState of ticks(recipe)) {
+  const emitter = new EventEmitter()
+
+  emitter.on('workFinish', () => {
+    spinner.succeed()
+    notifier.notify('Work finished!')
+  })
+
+  emitter.on('breakFinish', () => {
+    spinner.succeed()
+    notifier.notify('Break finished!')
+  })
+
+  emitter.on('allFinish', () => {
+    spinner.text = 'All pomodoros completed! 🌠'
+  })
+
+  for (const timerState of ticks(recipe, emitter)) {
     if (timerState.stage === 'work') {
       spinner.text = `Work stage ${timerState.repeat}, remaining time: ${printTime(timerState.remaining)}`
-      if (timerState.finished) {
-        spinner.succeed()
-      }
-      await setTimeoutAsync(1000)
+      spinner.color = 'green'
     }
     if (timerState.stage === 'break') {
       spinner.text = `Break stage ${timerState.repeat}, remaining time: ${printTime(timerState.remaining)}`
-      if (timerState.finished) {
-        spinner.succeed()
-      }
-      await setTimeoutAsync(1000)
+      spinner.color = 'magenta'
     }
-  }
-}
-
-interface TimerState {
-  remaining: number
-  stage: 'work' | 'break'
-  repeat: number
-  finished: boolean
-}
-
-function * ticks (recipe: RecipeUsingSeconds): Generator<TimerState> {
-  for (let r = 0; r < recipe.repeats; r++) {
-    for (let t = 0; t < recipe.workTime; t++) {
-      yield { stage: 'work', remaining: recipe.workTime - (t + 1), finished: t + 1 === recipe.workTime, repeat: r + 1 }
-    }
-    for (let t = 0; t < recipe.breakTime; t++) {
-      yield { stage: 'break', remaining: recipe.breakTime - (t + 1), finished: t + 1 === recipe.breakTime, repeat: r + 1 }
-    }
+    await setTimeoutAsync(1000)
   }
 }
 
