@@ -1,8 +1,8 @@
 import zod from 'zod'
-import * as os from 'os'
+import * as os from 'node:os'
 import * as yaml from 'js-yaml'
 import * as fs from 'fs-extra'
-import * as path from 'path'
+import * as path from 'node:path'
 import { RecipeUsingSeconds, RecipeUsingMinutes } from './recipe'
 
 const configPaths = [

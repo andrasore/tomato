@@ -1,11 +1,15 @@
 import notifier from 'node-notifier'
 import { Command } from 'commander'
-import { setTimeout as setTimeoutAsync } from 'timers/promises'
+import { setTimeout as setTimeoutAsync } from 'node:timers/promises'
 import * as packageJson from '../package.json'
 import * as config from './config'
-import ora from 'ora'
 import { ticks } from './ticks'
-import EventEmitter from 'events'
+import * as process from 'node:process'
+import * as readline from 'node:readline'
+
+const rl = readline.createInterface({
+  input: process.stdin, output: process.stdout, prompt: ''
+})
 
 const program = new Command()
 
@@ -21,44 +25,44 @@ run().catch(err => {
   process.exit(-1)
 })
 
+const TOMATO_UTF8 = '🍅'
+const SHOOTING_STAR_UTF8 = '🌠'
+const WRISTWATCH_UTF8 = '⌚'
+const CHECKMARK_UTF8 = '✅'
+
 async function run (): Promise<void> {
   const recipeName = program.opts().recipe as string
   const recipe = await config.getRecipe(recipeName)
 
-  const spinner = ora()
+  rl.write(`${TOMATO_UTF8} Starting recipe "${recipeName}"...\n`)
 
-  spinner.stopAndPersist({ symbol: '🍅', text: `Starting recipe "${recipeName}"...` })
-  spinner.start()
-
-  const emitter = new EventEmitter()
-
-  emitter.on('workFinish', (repeatNum) => {
-    spinner.succeed(`Work stage ${repeatNum} finished.`)
-    notifier.notify('Work finished!')
-    spinner.start()
-  })
-
-  emitter.on('breakFinish', (repeatNum) => {
-    spinner.succeed(`Break stage ${repeatNum} finished.`)
-    notifier.notify('Break finished!')
-    spinner.start()
-  })
-
-  emitter.on('recipeFinish', () => {
-    spinner.stopAndPersist({ symbol: '🌠', text: 'All pomodoros completed!' })
-  })
-
-  for (const timerState of ticks(recipe, emitter)) {
+  for (const timerState of ticks(recipe)) {
     if (timerState.stage === 'work') {
-      spinner.text = `Work stage ${timerState.repeat}, remaining time: ${printTime(timerState.remaining)}`
-      spinner.color = 'green'
+      if (!timerState.isFirstTick) {
+        rl.write(null, { ctrl: true, name: 'u' })
+      }
+      rl.write(`${WRISTWATCH_UTF8} Work stage ${timerState.repeat}, remaining time: ${printTime(timerState.remaining)}`)
+      if (timerState.isLastTick) {
+        rl.write(null, { ctrl: true, name: 'u' })
+        rl.write(`${CHECKMARK_UTF8} Work stage ${timerState.repeat} finished.\n`)
+        notifier.notify('Work finished!')
+      }
     }
     if (timerState.stage === 'break') {
-      spinner.text = `Break stage ${timerState.repeat}, remaining time: ${printTime(timerState.remaining)}`
-      spinner.color = 'magenta'
+      if (!timerState.isFirstTick) {
+        rl.write(null, { ctrl: true, name: 'u' })
+      }
+      rl.write(`${WRISTWATCH_UTF8} Break stage ${timerState.repeat}, remaining time: ${printTime(timerState.remaining)}`)
+      if (timerState.isLastTick) {
+        rl.write(null, { ctrl: true, name: 'u' })
+        rl.write(`${CHECKMARK_UTF8} Break stage ${timerState.repeat} finished.\n`)
+        notifier.notify('Break finished!')
+      }
     }
     await setTimeoutAsync(1000)
   }
+
+  rl.write(`${SHOOTING_STAR_UTF8} All pomodoros completed!\n`)
 }
 
 function printTime (secs: number): string {
