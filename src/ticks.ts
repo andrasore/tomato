@@ -1,5 +1,4 @@
 import { RecipeUsingSeconds } from './recipe'
-import EventEmitter from 'node:events'
 
 interface TimerState {
   remaining: number
@@ -13,7 +12,7 @@ interface TimerState {
  * returning a structure with all the useful data for display etc.
  * An event emitter is used for sending completion events. */
 export function * ticks (recipe: RecipeUsingSeconds): Generator<TimerState> {
-  for (let r = 0; r < recipe.repeats; r++) {
+  for (let r = 0; r < recipe.repeat; r++) {
     for (let t = 0; t < recipe.workTime; t++) {
       yield {
         stage: 'work',

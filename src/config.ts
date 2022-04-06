@@ -5,6 +5,19 @@ import * as fs from 'fs-extra'
 import * as path from 'node:path'
 import { RecipeUsingSeconds, RecipeUsingMinutes } from './recipe'
 
+export const SAMPLE_CONFIG = {
+  default: {
+    timeUnit: 'minutes',
+    workTime: 25,
+    breakTime: 5,
+    repeat: 1
+  },
+  leisure: {
+    workTime: 5,
+    breakTime: 5
+  }
+} as const
+
 const configPaths = [
   path.join(process.cwd(), '.tomrc.yml'),
   path.join(process.cwd(), '.tomrc.yaml'),
@@ -17,7 +30,7 @@ const ConfigSchema = zod.object({
     timeUnit: zod.union([zod.literal('seconds'), zod.literal('minutes')]).default('minutes'),
     workTime: zod.number().int().nonnegative().default(25),
     breakTime: zod.number().int().nonnegative().default(5),
-    repeats: zod.number().int().nonnegative().default(2)
+    repeat: zod.number().int().nonnegative().default(1)
   }))
 }).strict()
 
@@ -38,12 +51,7 @@ export async function getRecipe (recipeName: string): Promise<RecipeUsingSeconds
 
   if (recipe === null) {
     console.log('No config files found in cwd or home directory, using default recipe...')
-    recipe = {
-      timeUnit: 'minutes',
-      workTime: 25,
-      breakTime: 5,
-      repeats: 1
-    }
+    recipe = SAMPLE_CONFIG.default
   }
 
   if (recipe.timeUnit === 'seconds') {
@@ -58,6 +66,6 @@ function convertToUsingSeconds (recipe: RecipeUsingMinutes): RecipeUsingSeconds 
     timeUnit: 'seconds',
     workTime: recipe.workTime * 60,
     breakTime: recipe.breakTime * 60,
-    repeats: recipe.repeats
+    repeat: recipe.repeat
   }
 }

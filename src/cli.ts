@@ -6,6 +6,7 @@ import * as config from './config'
 import { ticks } from './ticks'
 import * as process from 'node:process'
 import * as readline from 'node:readline'
+import { createDb } from './db'
 
 const rl = readline.createInterface({
   input: process.stdin, output: process.stdout, prompt: ''
@@ -17,8 +18,17 @@ program.name('tom')
   .version(packageJson.version)
   .description(packageJson.description)
   .option('-r, --recipe <name>', 'Recipe name to use', 'default')
+  .addHelpText('after', `Example config:
+ 
+${JSON.stringify(config.SAMPLE_CONFIG, null, 2)}
+
+All recipe fields will default to the default recipe's values when not
+defined.
+`)
 
 program.parse()
+
+const db = createDb()
 
 run().catch(err => {
   console.error(err)
@@ -46,6 +56,7 @@ async function run (): Promise<void> {
         rl.write(null, { ctrl: true, name: 'u' })
         rl.write(`${CHECKMARK_UTF8} Work stage ${timerState.repeat} finished.\n`)
         notifier.notify('Work finished!')
+        db.insertWork.run(Math.floor(recipe.workTime / 60))
       }
     }
     if (timerState.stage === 'break') {
@@ -63,6 +74,7 @@ async function run (): Promise<void> {
   }
 
   rl.write(`${SHOOTING_STAR_UTF8} All pomodoros completed!\n`)
+  console.log(JSON.stringify(db.queryWorksToday.get()))
 }
 
 function printTime (secs: number): string {
