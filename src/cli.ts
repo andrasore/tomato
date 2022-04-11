@@ -18,6 +18,7 @@ program.name('tom')
   .version(packageJson.version)
   .description(packageJson.description)
   .option('-r, --recipe <name>', 'Recipe name to use', 'default')
+  .option('--stats', 'Print today\'s stats')
   .addHelpText('after', `Example config:
  
 ${JSON.stringify(config.SAMPLE_CONFIG, null, 2)}
@@ -29,6 +30,11 @@ defined.
 program.parse()
 
 const db = createDb()
+
+if (program.opts().stats as boolean) {
+  console.log(JSON.stringify(db.queryWorksToday.all()))
+  process.exit()
+}
 
 run().catch(err => {
   console.error(err)
@@ -74,7 +80,7 @@ async function run (): Promise<void> {
   }
 
   rl.write(`${SHOOTING_STAR_UTF8} All pomodoros completed!\n`)
-  console.log(JSON.stringify(db.queryWorksToday.get()))
+  console.log(JSON.stringify(db.queryWorksToday.all()))
 }
 
 function printTime (secs: number): string {
