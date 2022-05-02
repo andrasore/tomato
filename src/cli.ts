@@ -32,7 +32,7 @@ program.parse()
 const db = createDb()
 
 if (program.opts().stats as boolean) {
-  console.log(JSON.stringify(db.queryWorksToday.all()))
+  printStats()
   process.exit()
 }
 
@@ -62,7 +62,7 @@ async function run (): Promise<void> {
         rl.write(null, { ctrl: true, name: 'u' })
         rl.write(`${CHECKMARK_UTF8} Work stage ${timerState.repeat} finished.\n`)
         notifier.notify('Work finished!')
-        db.insertWork.run(Math.floor(recipe.workTime / 60))
+        db.insertWork(Math.floor(recipe.workTime / 60))
       }
     }
     if (timerState.stage === 'break') {
@@ -80,9 +80,15 @@ async function run (): Promise<void> {
   }
 
   rl.write(`${SHOOTING_STAR_UTF8} All pomodoros completed!\n`)
-  console.log(JSON.stringify(db.queryWorksToday.all()))
+  printStats()
+  rl.close()
 }
 
 function printTime (secs: number): string {
   return String(Math.floor(secs / 60)) + ':' + String(secs % 60).padStart(2, '0')
+}
+
+function printStats (): void {
+  console.log(`Work time was ${db.queryWorkTimeToday()} minutes.`)
+  console.log(JSON.stringify(db.queryWorkMinsToday()))
 }
