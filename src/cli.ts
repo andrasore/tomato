@@ -19,10 +19,8 @@ program.name('tom')
   .description(packageJson.description)
   .option('-r, --recipe <name>', 'Recipe name to use', 'default')
   .option('--stats', 'Print today\'s stats')
-  .addHelpText('after', `Example config:
- 
-${JSON.stringify(config.SAMPLE_CONFIG, null, 2)}
-
+  .addHelpText('after', `Example config (~/.tomrc.yml or ./.tomrc.yml):
+${config.SAMPLE_CONFIG}
 All recipe fields will default to the default recipe's values when not
 defined.
 `)

@@ -4,19 +4,18 @@ import * as yaml from 'js-yaml'
 import * as fs from 'fs-extra'
 import * as path from 'node:path'
 import { RecipeUsingSeconds, RecipeUsingMinutes } from './recipe'
+import assert from 'node:assert'
 
-export const SAMPLE_CONFIG = {
-  default: {
-    timeUnit: 'minutes',
-    workTime: 25,
-    breakTime: 5,
-    repeat: 1
-  },
-  leisure: {
-    workTime: 5,
-    breakTime: 5
-  }
-} as const
+export const SAMPLE_CONFIG = `
+default:
+  timeUnit: minutes
+  workTime: 25
+  breakTime: 5
+  repeat: 1
+leisure: 
+  workTime: 5
+  breakTime: 5
+` as const
 
 const configPaths = [
   path.join(process.cwd(), '.tomrc.yml'),
@@ -50,8 +49,10 @@ export async function getRecipe (recipeName: string): Promise<RecipeUsingSeconds
   }
 
   if (recipe === null) {
+    const config = ConfigSchema.parse(yaml.load(SAMPLE_CONFIG))
     console.log('No config files found in cwd or home directory, using default recipe...')
-    recipe = SAMPLE_CONFIG.default
+    recipe = config.recipes.default
+    assert(recipe) // for ts
   }
 
   if (recipe.timeUnit === 'seconds') {
