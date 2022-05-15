@@ -91,9 +91,9 @@ function printTime (secs: number): string {
 }
 
 function printStats (): void {
-  console.log(`Work time was ${db.queryWorkTimeToday()} minutes.`)
-  console.log('Work today:')
+  console.log(`${SHOOTING_STAR_UTF8} Work time was ${db.queryWorkTimeToday()} minutes.`)
+  console.log(`${SHOOTING_STAR_UTF8} Work today:`)
   for (const [mins, count] of Object.entries(db.queryWorkMinsToday())) {
-    console.log(`${mins} mins: ${count}`)
+    console.log(`${SHOOTING_STAR_UTF8} ${mins} mins: ${count}`)
   }
 }
