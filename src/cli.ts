@@ -50,7 +50,9 @@ async function run (): Promise<void> {
   const recipeName = program.opts().recipe as string
   const recipe = await config.getRecipe(recipeName)
 
-  rl.write(`${TOMATO_UTF8} Starting recipe "${recipeName}"...\n`)
+  rl.write(`${TOMATO_UTF8} Starting recipe "${recipeName}"\n`)
+  const finishTime = new Date(Date.now() + (recipe.workTime + recipe.breakTime) * recipe.repeat * 1000)
+  rl.write(`${TOMATO_UTF8} Finish time will be ${finishTime.toLocaleTimeString()}\n`)
 
   for (const timerState of ticks(recipe)) {
     if (timerState.stage === 'work') {
@@ -90,5 +92,8 @@ function printTime (secs: number): string {
 
 function printStats (): void {
   console.log(`Work time was ${db.queryWorkTimeToday()} minutes.`)
-  console.log(JSON.stringify(db.queryWorkMinsToday()))
+  console.log('Work today:')
+  for (const [mins, count] of Object.entries(db.queryWorkMinsToday())) {
+    console.log(`${mins} mins: ${count}`)
+  }
 }
