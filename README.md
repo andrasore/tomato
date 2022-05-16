@@ -20,11 +20,17 @@ Usage
       default:
         timeUnit: minutes
         workTime: 25
-        breakTime: 5
-        repeat: 1
-      leisure:
+        breakTime: 10
+        repeat: 3
+      leisure: 
+        timeUnit: seconds
         workTime: 5
+        breakTime: 5000
+        repeat: 2
+      suffering:
+        workTime: 40
         breakTime: 5
+        repeat: 6
 
     All recipe fields will default to the default recipe's values when not
     defined.
