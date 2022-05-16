@@ -95,8 +95,8 @@ function printStats (): void {
   }
 }
 
-function getFinishTime(recipe: RecipeUsingSeconds): Date {
+function getFinishTime (recipe: RecipeUsingSeconds): Date {
   return new Date(
-    Date.now() + (recipe.workTime + recipe.breakTime) * recipe.repeat - recipe.breakTime * 1000
+    Date.now() + ((recipe.workTime + recipe.breakTime) * recipe.repeat - recipe.breakTime) * 1000
   )
 }
