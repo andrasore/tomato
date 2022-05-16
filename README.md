@@ -16,14 +16,26 @@ Usage
       -h, --help           display help for command
     Example config (~/.tomrc.yml or ./.tomrc.yml):
 
-    default:
-      timeUnit: minutes
-      workTime: 25
-      breakTime: 5
-      repeat: 1
-    leisure:
-      workTime: 5
-      breakTime: 5
+    recipes:
+      default:
+        timeUnit: minutes
+        workTime: 25
+        breakTime: 5
+        repeat: 1
+      leisure:
+        workTime: 5
+        breakTime: 5
 
     All recipe fields will default to the default recipe's values when not
     defined.
+
+Multiple recipes can be configured in a `.tomrc.yml` file.
+
+Recipe options
+--------------
+
+    timeUnit: 'minutes'|'seconds' // Unit of workTime and breakTime
+    workTime: number  // Length of each work interval, aka pomodoro
+    breakTime: number // Length of breaks between work intervals
+    repeat: number // The total number of work + break repeats
+

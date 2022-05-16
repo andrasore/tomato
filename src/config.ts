@@ -7,14 +7,15 @@ import { RecipeUsingSeconds, RecipeUsingMinutes } from './recipe'
 import assert from 'node:assert'
 
 export const SAMPLE_CONFIG = `
-default:
-  timeUnit: minutes
-  workTime: 25
-  breakTime: 5
-  repeat: 1
-leisure: 
-  workTime: 5
-  breakTime: 5
+recipes:
+  default:
+    timeUnit: minutes
+    workTime: 25
+    breakTime: 5
+    repeat: 1
+  leisure: 
+    workTime: 5
+    breakTime: 5
 ` as const
 
 const configPaths = [

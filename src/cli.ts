@@ -7,6 +7,7 @@ import { ticks } from './ticks'
 import * as process from 'node:process'
 import * as readline from 'node:readline'
 import { createDb } from './db'
+import { RecipeUsingSeconds } from './recipe'
 
 const rl = readline.createInterface({
   input: process.stdin, output: process.stdout, prompt: ''
@@ -49,8 +50,7 @@ async function run (): Promise<void> {
   const recipe = await config.getRecipe(recipeName)
 
   rl.write(`${TOMATO_UTF8} Starting recipe "${recipeName}"\n`)
-  const finishTime = new Date(Date.now() + (recipe.workTime + recipe.breakTime) * recipe.repeat * 1000)
-  rl.write(`${TOMATO_UTF8} Finish time will be ${finishTime.toLocaleTimeString()}\n`)
+  rl.write(`${TOMATO_UTF8} Finish time will be ${getFinishTime(recipe).toLocaleTimeString()}\n`)
 
   for (const timerState of ticks(recipe)) {
     if (timerState.stage === 'work') {
@@ -89,9 +89,14 @@ function printTime (secs: number): string {
 }
 
 function printStats (): void {
-  console.log(`${SHOOTING_STAR_UTF8} Work time was ${db.queryWorkTimeToday()} minutes.`)
-  console.log(`${SHOOTING_STAR_UTF8} Work today:`)
+  console.log(`${SHOOTING_STAR_UTF8} Work time today was ${db.queryWorkTimeToday()} minutes.`)
   for (const [mins, count] of Object.entries(db.queryWorkMinsToday())) {
-    console.log(`${SHOOTING_STAR_UTF8} ${mins} mins: ${count}`)
+    console.log(`${SHOOTING_STAR_UTF8} ${mins} mins: ${count} pomodoros`)
   }
+}
+
+function getFinishTime(recipe: RecipeUsingSeconds): Date {
+  return new Date(
+    Date.now() + (recipe.workTime + recipe.breakTime) * recipe.repeat - recipe.breakTime * 1000
+  )
 }

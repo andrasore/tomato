@@ -22,6 +22,10 @@ export function * ticks (recipe: RecipeUsingSeconds): Generator<TimerState> {
         isLastTick: t === recipe.workTime - 1
       }
     }
+    // last break time is skipped
+    if (r === recipe.repeat - 1) {
+      continue
+    }
     for (let t = 0; t < recipe.breakTime; t++) {
       yield {
         stage: 'break',
